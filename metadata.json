@@ -1,0 +1,10 @@
+{
+  "name": "EcoLens AI - Smart Waste Scanner & Rewards",
+  "description": "AI-powered waste scanner detecting plastic, metal, paper, glass, and mixed waste with rupee market values, nearby recyclers, digital Waste Passports, community eco scores, and impact tracking.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

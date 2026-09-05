@@ -12,15 +12,18 @@ import {
   BookOpen,
   Award,
 } from "lucide-react";
-import { WastePassport, RecyclerFacility } from "../types";
+import { WastePassport, RecyclerFacility, UserProfile } from "../types";
 import { EcoLensLogo } from "./EcoLensLogo";
 import { PassportCard } from "./PassportCard";
+import { User, Settings, Smartphone } from "lucide-react";
 
 interface HomeViewProps {
   onStartScan: () => void;
   onOpenGuide: () => void;
   onOpenImpact: () => void;
   onOpenProfile: () => void;
+  profile: UserProfile;
+  onOpenEditDetails: () => void;
   passports: WastePassport[];
   userEcoScore: number;
   walletBalanceRupees: number;
@@ -33,6 +36,8 @@ export const HomeView: React.FC<HomeViewProps> = ({
   onOpenGuide,
   onOpenImpact,
   onOpenProfile,
+  profile,
+  onOpenEditDetails,
   passports,
   userEcoScore,
   walletBalanceRupees,
@@ -43,7 +48,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
   const nearestRecycler = localRecyclers[0];
 
   return (
-    <div id="home-view-container" className="max-w-md mx-auto px-4 pb-28 pt-3 space-y-5 animate-in fade-in duration-200">
+    <div id="home-view-container" className="max-w-md mx-auto px-4 pb-28 pt-3 space-y-4 animate-in fade-in duration-200">
       {/* Top App Header */}
       <div className="flex items-center justify-between">
         <EcoLensLogo size="md" pulse={false} />
@@ -63,6 +68,32 @@ export const HomeView: React.FC<HomeViewProps> = ({
               ₹{walletBalanceRupees.toFixed(2)}
             </span>
           </div>
+        </button>
+      </div>
+
+      {/* User Greeting & Details Bar */}
+      <div className="flex items-center justify-between px-3.5 py-2 rounded-2xl bg-zinc-900/80 border border-zinc-800 text-xs">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="w-7 h-7 rounded-xl bg-gradient-to-tr from-red-600 to-rose-600 text-white flex items-center justify-center font-bold text-xs shrink-0">
+            {profile.name.charAt(0).toUpperCase()}
+          </div>
+          <div className="truncate">
+            <span className="font-semibold text-white block truncate leading-tight">
+              {profile.name}
+            </span>
+            <span className="text-[10px] text-zinc-400 block truncate">
+              {profile.city}
+            </span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={onOpenEditDetails}
+          className="px-2.5 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 hover:text-white text-[11px] font-medium flex items-center gap-1.5 border border-zinc-700 shrink-0 transition"
+        >
+          <Settings className="w-3 h-3 text-red-400" />
+          <span>My Details</span>
         </button>
       </div>
 

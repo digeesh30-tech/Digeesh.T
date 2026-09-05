@@ -85,3 +85,14 @@ export interface MaterialGuideItem {
   dontList: string[];
   sortingGuide: string;
 }
+
+export interface UserProfile {
+  name: string;
+  email: string;
+  phone: string;
+  city: string;
+  upiId: string;
+  avatar?: string;
+  level: number;
+  joinedDate: string;
+}

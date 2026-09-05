@@ -6,7 +6,8 @@ import { ResultView } from "./components/ResultView";
 import { ImpactView } from "./components/ImpactView";
 import { ProfileView } from "./components/ProfileView";
 import { GuideModal } from "./components/GuideModal";
-import { WasteScanResult, WastePassport, LeaderboardUser } from "./types";
+import { UserDetailsModal } from "./components/UserDetailsModal";
+import { WasteScanResult, WastePassport, LeaderboardUser, UserProfile } from "./types";
 import {
   INITIAL_PASS_PORTS,
   INITIAL_LEADERBOARD,
@@ -18,6 +19,28 @@ export default function App() {
   const [currentScanResult, setCurrentScanResult] = useState<WasteScanResult | null>(null);
   const [isViewingResult, setIsViewingResult] = useState(false);
   const [isGuideOpen, setIsGuideOpen] = useState(false);
+  const [isUserDetailsOpen, setIsUserDetailsOpen] = useState(false);
+
+  // User Profile state with persistent localStorage
+  const [userProfile, setUserProfile] = useState<UserProfile>(() => {
+    const saved = localStorage.getItem("ecolens_user_profile");
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error("Failed to parse user profile", e);
+      }
+    }
+    return {
+      name: "Digeesh T",
+      email: "digeesht6@gmail.com",
+      phone: "+91 98450 12891",
+      city: "Bangalore, India",
+      upiId: "digeesht6@okhdfcbank",
+      level: 7,
+      joinedDate: "Sep 2026",
+    };
+  });
 
   // Persistent user state
   const [passports, setPassports] = useState<WastePassport[]>(() => {
@@ -42,7 +65,19 @@ export default function App() {
     return saved ? parseFloat(saved) : 34.5;
   });
 
-  const [leaderboard, setLeaderboard] = useState<LeaderboardUser[]>(INITIAL_LEADERBOARD);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardUser[]>(() => {
+    return INITIAL_LEADERBOARD.map((u) =>
+      u.isCurrentUser ? { ...u, name: `${userProfile.name} (You)` } : u
+    );
+  });
+
+  // Sync profile to local storage & leaderboard
+  useEffect(() => {
+    localStorage.setItem("ecolens_user_profile", JSON.stringify(userProfile));
+    setLeaderboard((prev) =>
+      prev.map((u) => (u.isCurrentUser ? { ...u, name: `${userProfile.name} (You)` } : u))
+    );
+  }, [userProfile]);
 
   // Sync to local storage
   useEffect(() => {
@@ -169,6 +204,8 @@ export default function App() {
                 onOpenGuide={() => setIsGuideOpen(true)}
                 onOpenImpact={() => setActiveTab("impact")}
                 onOpenProfile={() => setActiveTab("profile")}
+                profile={userProfile}
+                onOpenEditDetails={() => setIsUserDetailsOpen(true)}
                 passports={passports}
                 userEcoScore={userEcoScore}
                 walletBalanceRupees={walletBalanceRupees}
@@ -198,6 +235,8 @@ export default function App() {
                 passports={passports}
                 userEcoScore={userEcoScore}
                 walletBalanceRupees={walletBalanceRupees}
+                profile={userProfile}
+                onOpenEditDetails={() => setIsUserDetailsOpen(true)}
                 onUpdatePassportStatus={handleUpdatePassportStatus}
                 onRedeemReward={handleRedeemReward}
               />
@@ -205,6 +244,14 @@ export default function App() {
           </>
         )}
       </main>
+
+      {/* User Details & Device Install Modal */}
+      <UserDetailsModal
+        isOpen={isUserDetailsOpen}
+        onClose={() => setIsUserDetailsOpen(false)}
+        profile={userProfile}
+        onSaveProfile={(updated) => setUserProfile(updated)}
+      />
 
       {/* Material Detection & Segregation Guide Modal */}
       <GuideModal

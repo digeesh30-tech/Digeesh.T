@@ -16,13 +16,16 @@ import {
   FileArchive,
 } from "lucide-react";
 import confetti from "canvas-confetti";
-import { WastePassport } from "../types";
+import { WastePassport, UserProfile } from "../types";
 import { PassportCard } from "./PassportCard";
+import { User, Smartphone, Settings } from "lucide-react";
 
 interface ProfileViewProps {
   passports: WastePassport[];
   userEcoScore: number;
   walletBalanceRupees: number;
+  profile: UserProfile;
+  onOpenEditDetails: () => void;
   onUpdatePassportStatus: (id: string, newStatus: "sorted" | "recycled") => void;
   onRedeemReward: (amount: number, reason: string) => void;
 }
@@ -31,13 +34,22 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   passports,
   userEcoScore,
   walletBalanceRupees,
+  profile,
+  onOpenEditDetails,
   onUpdatePassportStatus,
   onRedeemReward,
 }) => {
   const [selectedFilter, setSelectedFilter] = useState<"all" | "identified" | "sorted" | "recycled">("all");
   const [showRedeemModal, setShowRedeemModal] = useState(false);
-  const [upiId, setUpiId] = useState("rahul.verma@okhdfcbank");
+  const [upiId, setUpiId] = useState(profile.upiId || "digeesht6@okaxis");
   const [redeemSuccessMsg, setRedeemSuccessMsg] = useState<string | null>(null);
+
+  // keep upiId in sync with profile
+  React.useEffect(() => {
+    if (profile.upiId) {
+      setUpiId(profile.upiId);
+    }
+  }, [profile.upiId]);
 
   const filteredPassports =
     selectedFilter === "all"
@@ -77,30 +89,46 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   return (
     <div id="profile-view-container" className="max-w-md mx-auto px-4 pb-28 pt-3 space-y-5 animate-in fade-in duration-200">
       {/* User Identity Card */}
-      <div className="p-5 rounded-3xl bg-gradient-to-b from-[#18181D] to-[#101014] border border-zinc-800 flex items-center gap-4">
-        <div className="relative">
-          <img
-            src="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150&auto=format&fit=crop&q=80"
-            alt="Rahul Verma"
-            className="w-16 h-16 rounded-2xl object-cover border-2 border-red-500/80 shadow-md shadow-red-600/30"
-          />
+      <div className="p-5 rounded-3xl bg-gradient-to-b from-[#18181D] to-[#101014] border border-zinc-800 flex items-start gap-4">
+        <div className="relative shrink-0">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-red-600 via-rose-600 to-amber-600 flex items-center justify-center text-white font-extrabold text-2xl border-2 border-red-500/80 shadow-md shadow-red-600/30">
+            {profile.name.charAt(0).toUpperCase()}
+          </div>
           <span className="absolute -bottom-1 -right-1 bg-red-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full border border-zinc-900">
-            Lvl 7
+            Lvl {profile.level || 7}
           </span>
         </div>
 
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-bold text-white leading-tight">Rahul Verma</h3>
-            <span className="text-xs font-bold text-amber-400 bg-amber-500/15 px-2 py-0.5 rounded-full border border-amber-500/30">
+            <h3 className="text-base sm:text-lg font-bold text-white leading-tight truncate">
+              {profile.name}
+            </h3>
+            <span className="text-xs font-bold text-amber-400 bg-amber-500/15 px-2 py-0.5 rounded-full border border-amber-500/30 shrink-0 ml-2">
               Rank #3
             </span>
           </div>
-          <p className="text-xs text-zinc-400 mt-0.5">Eco Pioneer • Bangalore East</p>
+          <p className="text-xs text-zinc-400 mt-0.5 truncate">
+            {profile.city} • <span className="text-zinc-500">{profile.email}</span>
+          </p>
           <div className="flex items-center gap-2 mt-2 text-xs">
             <span className="font-semibold text-emerald-400">{userEcoScore} pts</span>
             <span className="text-zinc-500">•</span>
             <span className="text-zinc-300">{recycledCount} Recycled</span>
+          </div>
+
+          <div className="mt-3 flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onOpenEditDetails}
+              className="px-3 py-1 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-semibold flex items-center gap-1.5 border border-zinc-700 transition active:scale-95"
+            >
+              <Settings className="w-3.5 h-3.5 text-red-400" />
+              <span>Edit Details</span>
+            </button>
+            <span className="text-[11px] text-zinc-500 font-mono">
+              UPI: {profile.upiId}
+            </span>
           </div>
         </div>
       </div>
@@ -198,6 +226,32 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
             ))}
           </div>
         )}
+      </div>
+
+      {/* INSTALL APP ON MOBILE OR DESKTOP */}
+      <div className="p-4 rounded-2xl bg-gradient-to-r from-red-950/30 via-zinc-900 to-zinc-900 border border-red-500/30 space-y-2.5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-white">
+            <Smartphone className="w-4 h-4 text-red-400" />
+            <h4 className="text-xs font-bold uppercase tracking-wider text-white">
+              Install App on Your Phone
+            </h4>
+          </div>
+          <span className="text-[10px] bg-red-500/20 text-red-300 font-semibold px-2 py-0.5 rounded-full border border-red-500/30">
+            PWA Ready
+          </span>
+        </div>
+        <p className="text-xs text-zinc-400 leading-relaxed">
+          Add EcoLens directly to your mobile home screen to scan packaging with your camera anytime without needing an app store download.
+        </p>
+        <button
+          type="button"
+          onClick={onOpenEditDetails}
+          className="w-full py-2.5 px-4 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-semibold text-xs flex items-center justify-center gap-2 border border-zinc-700 transition active:scale-[0.98]"
+        >
+          <Smartphone className="w-3.5 h-3.5 text-red-400" />
+          <span>Install App / Edit My Details</span>
+        </button>
       </div>
 
       {/* DEVELOPER & SOURCE CODE EXPORT */}
